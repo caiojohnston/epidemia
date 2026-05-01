@@ -2,7 +2,7 @@
 
 > Sistema multiagente autônomo para vigilância epidemiológica do Brasil, integrando dados públicos do SUS, DATASUS e SINAN com Agentic RAG, Deep Learning e orquestração distribuída de agentes.
 
-![Python](https://img.shields.io/badge/Python-3.11-blue?style=flat-square)
+![Python](https://img.shields.io/badge/Python-3.13-blue?style=flat-square)
 ![LangGraph](https://img.shields.io/badge/LangGraph-0.3-green?style=flat-square)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square)
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-Ready-326CE5?style=flat-square)
@@ -71,7 +71,22 @@ O projeto foi desenhado intencionalmente para cobrir o que há de mais relevante
            +-------------------------------------------------+
 ```
 
-### Estrutura do Repositório
+### Estrutura Implementada (hoje)
+
+```
+epidemia/
+├── api/                    # FastAPI — health check, Pydantic settings, uv
+│   ├── src/main.py
+│   ├── Dockerfile.api      # Multi-stage, python:3.13-slim, uv
+│   ├── Dockerfile.worker
+│   └── pyproject.toml
+├── web/                    # Next.js 16 + shadcn/ui + next-auth + zustand
+├── spec/TASKS.txt          # Board de tasks
+├── docker-compose.yml      # api, worker, PostGIS, Redis, Qdrant
+└── .env.example
+```
+
+### Estrutura Alvo (ao longo do roadmap)
 
 ```
 epidemia/
@@ -284,20 +299,47 @@ O sistema é extensível: adicionar uma nova doença significa adicionar sua CID
 
 ### Pré-requisitos
 
+- [Docker](https://docs.docker.com/get-docker/) + Docker Compose v2
+- Git
+
+Para desenvolvimento local (opcional):
+- [uv](https://docs.astral.sh/uv/) (API Python)
+- [pnpm](https://pnpm.io/) (frontend)
+
+### Instalação e execução com Docker
+
 ```bash
--
+git clone https://github.com/caiojohnston/epidemia.git
+cd epidemia
+
+# Configurar variáveis de ambiente
+cp .env.example .env
+
+# Subir todos os serviços
+docker compose up --build
 ```
 
-### Instalação local
+| Serviço | URL |
+|---|---|
+| API | http://localhost:8080 |
+| Health check | http://localhost:8080/ |
+| Qdrant dashboard | http://localhost:6333/dashboard |
+
+### Desenvolvimento local da API
 
 ```bash
--
+cd api
+cp .env.example .env
+uv sync
+make dev        # uvicorn com hot-reload em :8080
 ```
 
-### Executando
+### Desenvolvimento local do frontend
 
 ```bash
--
+cd web
+pnpm install
+pnpm dev        # :3000
 ```
 ---
 
@@ -335,6 +377,12 @@ O sistema é extensível: adicionar uma nova doença significa adicionar sua CID
 
 - [x] Definição de arquitetura e estrutura do projeto
 - [ ] **Fase 1** - Infraestrutura base: Docker Compose + FastAPI + Qdrant + PostGIS
+  - [x] Docker Compose (api, worker, PostGIS 16-3.4, Redis 7, Qdrant v1.9)
+  - [x] Dockerfile.api e Dockerfile.worker (multi-stage, uv, python:3.13-slim)
+  - [ ] PostGIS schema geoespacial municípios brasileiros
+  - [ ] Qdrant collections + client wrapper
+  - [ ] Pydantic settings completo com todas as variáveis
+  - [ ] GitHub Actions CI (lint + testes)
 - [ ] **Fase 2** - Ingestão e normalização de dados DATASUS e SINAN
 - [ ] **Fase 3** - Pipeline RAG com literatura epidemiológica em pt-BR
 - [ ] **Fase 4** - Agentes especializados com LangGraph
