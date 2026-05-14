@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     qdrant_host: str = "localhost"
     qdrant_port: int = 6333
 
+    mcp_brasil_url: str = "http://localhost:8061"
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     @computed_field

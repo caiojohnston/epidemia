@@ -1,0 +1,9 @@
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
+
+WORKDIR /app
+
+RUN uv pip install --system mcp-brasil
+
+EXPOSE 8061
+
+CMD ["fastmcp", "run", "mcp_brasil.server:mcp", "--transport", "http", "--port", "8061"]

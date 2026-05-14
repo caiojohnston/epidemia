@@ -27,6 +27,25 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      mcp-brasil:
+        condition: service_healthy
+    networks:
+      - epidemia_net
+    restart: unless-stopped
+
+  mcp-brasil:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp-brasil
+    ports:
+      - "8061:8061"
+    env_file: .env
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8061/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     networks:
       - epidemia_net
     restart: unless-stopped
